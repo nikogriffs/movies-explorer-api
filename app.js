@@ -9,11 +9,12 @@ const { requestLogger, errorLogger } = require('./middlewares/loggers');
 const limiter = require('./middlewares/limiter');
 const { errorHandler } = require('./middlewares/error-handler');
 const routers = require('./routes/index');
+const { DEV_MONGO_URL } = require('./utils/dev-config');
 
 const { PORT = 3000, NODE_ENV, MONGO_URL } = process.env;
 const app = express();
 
-mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : 'mongodb://localhost:27017/bitfilmsdb', {
+mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : DEV_MONGO_URL, {
   useUnifiedTopology: true,
   useNewUrlParser: true,
 });

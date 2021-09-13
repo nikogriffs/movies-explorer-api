@@ -1,12 +1,13 @@
 const { celebrate, Joi } = require('celebrate');
 const validator = require('validator');
+const { messageNotURL } = require('../utils/messages');
 
 const isURL = (value) => {
   const result = validator.isURL(value, { require_protocol: true });
   if (result) {
     return value;
   }
-  throw new Error('is not URL');
+  throw new Error(messageNotURL);
 };
 
 const validateUser = celebrate({

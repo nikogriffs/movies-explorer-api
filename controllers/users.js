@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const UnauthorizedError = require('../errors/unauthorized-err');
 const ConflictError = require('../errors/conflict-err');
+const { messageEmailUsed, messageWrongEmailOrPassword, messageUserLogout } = require('../utils/messages');
+const { JWT_DEV_SECRET } = require('../utils/dev-config');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -18,7 +20,7 @@ module.exports.createUser = (req, res, next) => {
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'MongoServerError' && err.code === 11000) {
-        return next(new ConflictError('При регистрации указан email, который уже существует на сервере'));
+        return next(new ConflictError(messageEmailUsed));
       }
       return next(err);
     });
@@ -37,7 +39,7 @@ module.exports.updateUser = (req, res, next) => {
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'MongoServerError' && err.code === 11000) {
-        return next(new ConflictError('При обновлении указан email, который уже существует на сервере'));
+        return next(new ConflictError(messageEmailUsed));
       }
       return next(err);
     });
@@ -49,20 +51,20 @@ module.exports.login = (req, res, next) => {
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return next(new UnauthorizedError('Неверный email или пароль'));
+        return next(new UnauthorizedError(messageWrongEmailOrPassword));
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            next(new UnauthorizedError('Неверный email или пароль'));
+            next(new UnauthorizedError(messageWrongEmailOrPassword));
           } else {
             const token = jwt.sign({ _id: user._id },
-              NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+              NODE_ENV === 'production' ? JWT_SECRET : JWT_DEV_SECRET,
               { expiresIn: '7d' });
 
             res.cookie('jwt', token, {
-              httpOnly: true, sameSite: 'none', secure: true,
-            }).send({ token });
+              httpOnly: true,
+            }).status(201).send({ token });
           }
         });
     })
@@ -71,6 +73,6 @@ module.exports.login = (req, res, next) => {
 
 module.exports.logout = (req, res) => {
   res.clearCookie('jwt', {
-    httpOnly: true, sameSite: 'none', secure: true,
-  }).send({ message: 'Пользователь вышел из профиля' });
+    httpOnly: true,
+  }).status(200).send({ message: messageUserLogout });
 };

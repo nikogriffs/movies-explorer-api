@@ -1,6 +1,7 @@
 const Movie = require('../models/movie');
 const ForbiddenError = require('../errors/forbidden-err');
 const NotFoundError = require('../errors/not-found-err');
+const { messageMovieDeleted, messageMovieNotDeleted, messageMovieNotFound } = require('../utils/messages');
 
 module.exports.getMovies = (req, res, next) => {
   Movie.find({ owner: req.user._id })
@@ -39,14 +40,14 @@ module.exports.deleteMovie = (req, res, next) => {
       if (JSON.stringify(req.user._id) === JSON.stringify(movie.owner)) {
         return Movie.findByIdAndDelete(req.params.movieId)
           .then(() => {
-            res.status(200).send({ message: 'Данные успешно удалёны' });
+            res.status(200).send({ message: messageMovieDeleted });
           });
       }
-      return next(new ForbiddenError('Доступ к данным запрещён'));
+      return next(new ForbiddenError(messageMovieNotDeleted));
     })
     .catch((err) => {
       if (err.message === 'NotFound') {
-        return next(new NotFoundError('Данные по указанному ID не найдены'));
+        return next(new NotFoundError(messageMovieNotFound));
       }
       return next(err);
     });
