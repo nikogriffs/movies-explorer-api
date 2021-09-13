@@ -6,7 +6,7 @@
 
 ## **Инструкция:**
 
-[Backend](https://api.mesto.nikogriffs.nomoredomains.work)
+[Backend](https://api.diploma.nikogriffs.nomoredomains.monster)
 
 Публичный IP: 178.154.252.107
 
