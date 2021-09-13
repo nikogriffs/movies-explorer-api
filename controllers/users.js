@@ -63,7 +63,7 @@ module.exports.login = (req, res, next) => {
               { expiresIn: '7d' });
 
             res.cookie('jwt', token, {
-              httpOnly: true,
+              httpOnly: true, sameSite: 'none', secure: true,
             }).status(201).send({ token });
           }
         });
@@ -73,6 +73,6 @@ module.exports.login = (req, res, next) => {
 
 module.exports.logout = (req, res) => {
   res.clearCookie('jwt', {
-    httpOnly: true,
+    httpOnly: true, sameSite: 'none', secure: true,
   }).status(200).send({ message: messageUserLogout });
 };
