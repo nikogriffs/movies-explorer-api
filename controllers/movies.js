@@ -5,7 +5,7 @@ const { messageMovieDeleted, messageMovieNotDeleted, messageMovieNotFound } = re
 
 module.exports.getMovies = (req, res, next) => {
   Movie.find({ owner: req.user._id })
-    .then((cards) => res.status(200).send(cards))
+    .then((movies) => res.status(200).send(movies))
     .catch(next);
 };
 
