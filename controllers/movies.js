@@ -5,7 +5,7 @@ const { messageMovieDeleted, messageMovieNotDeleted, messageMovieNotFound } = re
 
 module.exports.getMovies = (req, res, next) => {
   Movie.find({ owner: req.user._id })
-    .then((movies) => res.status(200).send(movies))
+    .then((movies) => res.send(movies))
     .catch(next);
 };
 
@@ -29,26 +29,21 @@ module.exports.createMovie = (req, res, next) => {
     nameEN,
     owner: req.user._id,
   })
-    .then((movie) => res.status(200).send(movie))
+    .then((movie) => res.send(movie))
     .catch(next);
 };
 
 module.exports.deleteMovie = (req, res, next) => {
   Movie.findById(req.params.movieId)
-    .orFail(new Error('NotFound'))
+    .orFail(new NotFoundError(messageMovieNotFound))
     .then((movie) => {
       if (JSON.stringify(req.user._id) === JSON.stringify(movie.owner)) {
-        return Movie.findByIdAndDelete(req.params.movieId)
+        return movie.remove()
           .then(() => {
-            res.status(200).send({ message: messageMovieDeleted });
+            res.send({ message: messageMovieDeleted });
           });
       }
       return next(new ForbiddenError(messageMovieNotDeleted));
     })
-    .catch((err) => {
-      if (err.message === 'NotFound') {
-        return next(new NotFoundError(messageMovieNotFound));
-      }
-      return next(err);
-    });
+    .catch(next);
 };

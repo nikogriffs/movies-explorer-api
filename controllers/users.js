@@ -17,7 +17,7 @@ module.exports.createUser = (req, res, next) => {
     .then((hash) => User.create({
       email, password: hash, name,
     }))
-    .then((user) => res.status(200).send(user))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'MongoServerError' && err.code === 11000) {
         return next(new ConflictError(messageEmailUsed));
@@ -28,7 +28,7 @@ module.exports.createUser = (req, res, next) => {
 
 module.exports.getUser = (req, res, next) => {
   User.findById(req.user._id)
-    .then((users) => res.status(200).send(users))
+    .then((users) => res.send(users))
     .catch(next);
 };
 
@@ -36,7 +36,7 @@ module.exports.updateUser = (req, res, next) => {
   const { email, name } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { email, name }, { new: true, runValidators: true })
-    .then((user) => res.status(200).send(user))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'MongoServerError' && err.code === 11000) {
         return next(new ConflictError(messageEmailUsed));
@@ -64,7 +64,7 @@ module.exports.login = (req, res, next) => {
 
             res.cookie('jwt', token, {
               httpOnly: true, sameSite: 'none', secure: true,
-            }).status(201).send({ token });
+            }).send({ token });
           }
         });
     })
@@ -74,5 +74,5 @@ module.exports.login = (req, res, next) => {
 module.exports.logout = (req, res) => {
   res.clearCookie('jwt', {
     httpOnly: true, sameSite: 'none', secure: true,
-  }).status(200).send({ message: messageUserLogout });
+  }).send({ message: messageUserLogout });
 };

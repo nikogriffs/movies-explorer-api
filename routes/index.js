@@ -11,11 +11,10 @@ router.post('/signup', validateRegistration, createUser);
 
 router.post('/signin', validateAuthorization, login);
 
+router.use(auth);
+router.use('/users', userRouters);
+router.use('/movies', movieRouters);
 router.post('/signout', logout);
-
-router.use('/users', auth, userRouters);
-router.use('/movies', auth, movieRouters);
-
 router.use((req, res, next) => next(new NotFoundError(messageResourceNotFound)));
 
 module.exports = router;
